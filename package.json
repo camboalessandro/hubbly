@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "Hubbly — all your chats in one place, with scheduling where it's legal.",
   "main": "src/main/index.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "electron .",
     "test": "vitest run",

@@ -76,6 +76,17 @@ The viewer works with zero configuration. Scheduling needs free Telegram API cre
 
 Scheduled messages are stored on Telegram's servers, so they are sent on time even if Hubbly is closed and your machine is asleep or off.
 
+## Troubleshooting the install
+
+`npm install` failing is almost always one of these:
+
+- **Node too old** — Hubbly requires **Node 20+** (`node -v` to check). Update via [nodejs.org](https://nodejs.org) or `nvm install 20`.
+- **Electron binary download blocked** — installing Electron downloads a ~100 MB
+  binary from GitHub. On flaky networks or behind a proxy this fails with
+  `ECONNRESET` / `RequestError`. Retry on a stable connection, or set your proxy
+  (`npm config set proxy ...`) / an [Electron mirror](https://www.electronjs.org/docs/latest/tutorial/installation#mirror).
+- Stale state — try `rm -rf node_modules package-lock.json && npm install` as a last resort.
+
 ## Development
 
 ```bash
