@@ -37,6 +37,19 @@ Grab the latest build for your OS from the [**Releases**](../../releases) page:
 | Windows | `Hubbly-Setup-<version>.exe` |
 | Linux | `Hubbly-<version>.AppImage` |
 
+> **macOS: "Hubbly is damaged and can't be opened"** — it isn't damaged. The app
+> is not notarized by Apple (that requires a paid developer certificate), so
+> Gatekeeper quarantines anything downloaded from a browser and shows this
+> misleading message. After dragging Hubbly to Applications, clear the
+> quarantine flag once:
+>
+> ```bash
+> xattr -cr /Applications/Hubbly.app
+> ```
+>
+> Then open it normally. Windows shows a similar SmartScreen warning — click
+> "More info" → "Run anyway".
+
 ### Run from source
 
 Requires Node.js 20+.
