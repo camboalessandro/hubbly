@@ -85,6 +85,17 @@ Scheduled messages are stored on Telegram's servers, so they are sent on time ev
   binary from GitHub. On flaky networks or behind a proxy this fails with
   `ECONNRESET` / `RequestError`. Retry on a stable connection, or set your proxy
   (`npm config set proxy ...`) / an [Electron mirror](https://www.electronjs.org/docs/latest/tutorial/installation#mirror).
+- **"Electron failed to install correctly, please delete node_modules/electron…"**
+  on `npm start` — the install finished but Electron's ~100 MB binary was never
+  downloaded (its postinstall step was skipped or interrupted). Fix:
+
+  ```bash
+  rm -rf node_modules/electron && npm install
+  # still failing? force the binary download:
+  node node_modules/electron/install.js
+  # and make sure this prints "false":
+  npm config get ignore-scripts
+  ```
 - Stale state — try `rm -rf node_modules package-lock.json && npm install` as a last resort.
 
 ## Development
