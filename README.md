@@ -29,7 +29,7 @@ By design, **WhatsApp is view-only**: WhatsApp's terms forbid automation on pers
 
 ### Download (recommended)
 
-Grab the latest build for your OS from the [**Releases**](../../releases) page:
+Download the latest build for your OS from the [**Releases**](../../releases) page:
 
 | OS | File |
 |---|---|
