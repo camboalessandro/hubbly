@@ -96,6 +96,14 @@ Scheduled messages are stored on Telegram's servers, so they are sent on time ev
   # and make sure this prints "false":
   npm config get ignore-scripts
   ```
+- **`EACCES: permission denied` inside `node_modules`** — some files are owned
+  by root, usually because a command was once run with `sudo`. Clean up and
+  reinstall as your normal user (never run `npm install` with sudo):
+
+  ```bash
+  sudo rm -rf node_modules package-lock.json
+  npm install
+  ```
 - Stale state — try `rm -rf node_modules package-lock.json && npm install` as a last resort.
 
 ## Development
