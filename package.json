@@ -1,0 +1,50 @@
+{
+  "name": "crosschat",
+  "productName": "Hubbly",
+  "version": "1.0.0",
+  "description": "Hubbly — all your chats in one place, with scheduling where it's legal.",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.camboalessandro.hubbly",
+    "productName": "Hubbly",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.social-networking"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Network"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "input": "^1.0.1",
+    "telegram": "^2.26.22"
+  },
+  "devDependencies": {
+    "electron": "^37.10.3",
+    "electron-builder": "^26.15.3",
+    "vitest": "^1.6.1"
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.session
+.crosschat/
+.DS_Store
+
+# internal working docs (not part of the product)
+docs/
+PROJECT.md
+.claude/
