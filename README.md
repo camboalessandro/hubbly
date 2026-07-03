@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/renderer/assets/hubbly.svg" width="120" alt="Hubbly logo" />
+  <img src="ui/public/assets/hubbly.svg" width="120" alt="Hubbly logo" />
 </p>
 
 <h1 align="center">Hubbly</h1>
