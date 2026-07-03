@@ -140,3 +140,7 @@ Releases are built automatically by GitHub Actions when a `v*` tag is pushed.
 
 - **Telegram** automation uses the official MTProto API with your own credentials — supported by Telegram.
 - **WhatsApp** (and every other service) is the unmodified official web app in a sandboxed view. No automation, no unofficial clients.
+
+## License
+
+Hubbly is open source under the [MIT License](LICENSE) — free to use, modify and redistribute, with attribution.
