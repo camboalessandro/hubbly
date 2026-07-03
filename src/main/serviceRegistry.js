@@ -69,6 +69,14 @@ const SERVICES = [
     icon: 'assets/gmail.svg',
     lazy: true,
   },
+  {
+    id: 'spotify',
+    name: 'Spotify',
+    url: 'https://open.spotify.com/intl-it',
+    partition: 'persist:spotify',
+    automation: false,
+    icon: 'assets/spotify.svg',
+  },
 ]
 
 function getService(id) {

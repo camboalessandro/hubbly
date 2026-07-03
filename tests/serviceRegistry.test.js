@@ -32,7 +32,7 @@ test('each service points at an icon asset file', () => {
 test('catalog exposes the full connector set with required fields', () => {
   const ids = SERVICES.map((s) => s.id)
   expect(ids).toEqual(
-    expect.arrayContaining(['whatsapp', 'telegram', 'teams', 'discord', 'slack', 'messenger', 'instagram']),
+    expect.arrayContaining(['whatsapp', 'telegram', 'teams', 'discord', 'slack', 'messenger', 'instagram', 'spotify']),
   )
   SERVICES.forEach((s) => {
     expect(typeof s.id).toBe('string')
