@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { CrosschatService } from '../../crosschat.service'
+import { HubblyService } from '../../hubbly.service'
 import { ServicesStore } from '../../services.store'
-import { ScheduledEntry } from '../../crosschat.types'
+import { ScheduledEntry } from '../../hubbly.types'
 
 @Component({
   selector: 'app-scheduler-panel',
@@ -16,7 +16,7 @@ import { ScheduledEntry } from '../../crosschat.types'
   templateUrl: './scheduler-panel.html',
 })
 export class SchedulerPanel implements OnInit {
-  private api = inject(CrosschatService)
+  private api = inject(HubblyService)
   readonly store = inject(ServicesStore)
 
   recipient = ''

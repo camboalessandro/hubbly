@@ -1,7 +1,7 @@
 import os from 'os'
 import path from 'path'
 
-const dataDir = path.join(os.homedir(), '.crosschat')
+const dataDir = path.join(os.homedir(), '.hubbly')
 
 const config = {
   dataDir,

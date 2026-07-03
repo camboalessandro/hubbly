@@ -24,7 +24,7 @@ export interface ScheduleResult {
 
 declare global {
   interface Window {
-    crosschat: {
+    hubbly: {
       getCatalog(): Promise<ServiceEntry[]>
       getEnabledServices(): Promise<ServiceEntry[]>
       addService(id: string): Promise<ServiceEntry[]>

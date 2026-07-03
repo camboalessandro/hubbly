@@ -13,11 +13,12 @@ import { createServicesController } from './servicesController'
 import { SERVICES } from './serviceRegistry'
 import { ScheduleInput } from '../shared/ipc.types'
 
-// Branding: the app is "Hubbly", but Electron derives its userData dir (where
-// the persist: partitions live) from the app name — renaming would silently log
-// the user out of every service. Pin userData to the original location.
+// Data lives under the "Hubbly" name (userData: webview partitions/logins).
+// History: the project started as "crosschat" and the old dirs were kept for a
+// while to preserve logins; on 2026-07-03 the user chose a clean break — old
+// `.../crosschat` and `~/.crosschat` dirs are orphaned, sessions restart fresh.
 app.setName('Hubbly')
-app.setPath('userData', path.join(app.getPath('appData'), 'crosschat'))
+app.setPath('userData', path.join(app.getPath('appData'), 'Hubbly'))
 
 fs.mkdirSync(config.dataDir, { recursive: true })
 const store = createStore(config.storeFile)
@@ -246,7 +247,7 @@ function createWindow(): void {
         console.error('[DIAG sched-visibility]', state)
         await new Promise((r) => setTimeout(r, Number(process.env['CC_SHOT_WAIT'] || 300)))
         const img = await win.webContents.capturePage()
-        fs.writeFileSync('/tmp/crosschat-telegram.png', img.toPNG())
+        fs.writeFileSync('/tmp/hubbly-diag.png', img.toPNG())
       }
       setTimeout(() => app.quit(), 200)
     })

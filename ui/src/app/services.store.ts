@@ -1,10 +1,10 @@
 import { Injectable, computed, inject, signal } from '@angular/core'
-import { CrosschatService } from './crosschat.service'
-import { ServiceEntry } from './crosschat.types'
+import { HubblyService } from './hubbly.service'
+import { ServiceEntry } from './hubbly.types'
 
 @Injectable({ providedIn: 'root' })
 export class ServicesStore {
-  private api = inject(CrosschatService)
+  private api = inject(HubblyService)
 
   /** Sidebar order — what the user sees and drags. */
   readonly sidebar = signal<ServiceEntry[]>([])

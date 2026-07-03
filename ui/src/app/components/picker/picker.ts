@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, output, signal } from '@angular/core'
-import { CrosschatService } from '../../crosschat.service'
+import { HubblyService } from '../../hubbly.service'
 import { ServicesStore } from '../../services.store'
-import { ServiceEntry } from '../../crosschat.types'
+import { ServiceEntry } from '../../hubbly.types'
 
 @Component({
   selector: 'app-picker',
@@ -9,7 +9,7 @@ import { ServiceEntry } from '../../crosschat.types'
   templateUrl: './picker.html',
 })
 export class Picker implements OnInit {
-  private api = inject(CrosschatService)
+  private api = inject(HubblyService)
   private store = inject(ServicesStore)
 
   readonly close = output<void>()

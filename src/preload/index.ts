@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { ScheduleInput } from '../shared/ipc.types'
 
-contextBridge.exposeInMainWorld('crosschat', {
+contextBridge.exposeInMainWorld('hubbly', {
   getCatalog: () => ipcRenderer.invoke('svc:catalog'),
   getEnabledServices: () => ipcRenderer.invoke('svc:enabled'),
   addService: (id: string) => ipcRenderer.invoke('svc:add', id),

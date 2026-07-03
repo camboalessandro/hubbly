@@ -1,6 +1,6 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, inject, signal } from '@angular/core'
 import { ServicesStore } from './services.store'
-import { ServiceEntry } from './crosschat.types'
+import { ServiceEntry } from './hubbly.types'
 import { Sidebar } from './components/sidebar/sidebar'
 import { SchedulerPanel } from './components/scheduler-panel/scheduler-panel'
 import { Picker } from './components/picker/picker'
