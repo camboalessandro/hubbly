@@ -57,8 +57,28 @@ Requires Node.js 20+.
 ```bash
 git clone git@github.com:camboalessandro/hubbly.git
 cd hubbly
-npm install
-npm start
+npm install               # engine deps (Electron, GramJS, TypeScript)
+npm install --prefix ui   # UI deps (Angular)
+npm run ui:build          # build the Angular UI once
+npm start                 # compiles the engine and launches
+```
+
+## Project structure & development
+
+Hubbly is two programs in one box, the standard Electron shape:
+
+| Folder | What | Built with |
+|---|---|---|
+| `src/` | the engine — Electron main process: windows, IPC, Telegram API, storage (TypeScript) | `tsc` → `dist-electron/` |
+| `ui/` | the interface — Angular 20 (standalone components + signals) | `ng build` → `ui/dist/` |
+
+They talk over Electron IPC through the `window.hubbly` preload bridge.
+
+While developing, run two terminals:
+
+```bash
+npm run ui:watch   # rebuilds the Angular UI on save
+npm start          # launches the app (Cmd/Ctrl+R in the window to reload the UI)
 ```
 
 ## Setting up Telegram scheduling (optional)
