@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, output, signal } from '@angular/core'
-import { CrosschatService } from './crosschat.service'
-import { ServicesStore } from './services.store'
-import { ServiceEntry } from './crosschat.types'
+import { CrosschatService } from '../crosschat.service'
+import { ServicesStore } from '../services.store'
+import { ServiceEntry } from '../crosschat.types'
 
 @Component({
   selector: 'app-picker',

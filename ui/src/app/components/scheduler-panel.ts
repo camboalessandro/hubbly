@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { CrosschatService } from './crosschat.service'
-import { ServicesStore } from './services.store'
-import { ScheduledEntry } from './crosschat.types'
+import { CrosschatService } from '../crosschat.service'
+import { ServicesStore } from '../services.store'
+import { ScheduledEntry } from '../crosschat.types'
 
 @Component({
   selector: 'app-scheduler-panel',

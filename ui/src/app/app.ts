@@ -1,9 +1,9 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, inject, signal } from '@angular/core'
 import { ServicesStore } from './services.store'
 import { ServiceEntry } from './crosschat.types'
-import { Sidebar } from './sidebar'
-import { SchedulerPanel } from './scheduler-panel'
-import { Picker } from './picker'
+import { Sidebar } from './components/sidebar'
+import { SchedulerPanel } from './components/scheduler-panel'
+import { Picker } from './components/picker'
 
 @Component({
   selector: 'app-root',
