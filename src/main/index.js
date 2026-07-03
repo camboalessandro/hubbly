@@ -244,7 +244,7 @@ function createWindow() {
           })()
         `)
         console.error('[DIAG sched-visibility]', state)
-        await new Promise((r) => setTimeout(r, 300))
+        await new Promise((r) => setTimeout(r, Number(process.env.CC_SHOT_WAIT || 300)))
         const img = await win.webContents.capturePage()
         fs.writeFileSync('/tmp/crosschat-telegram.png', img.toPNG())
       }
