@@ -1,7 +1,7 @@
-const os = require('os')
-const path = require('path')
-const fs = require('fs')
-const { createStore } = require('../src/store/scheduledStore')
+import os from 'os'
+import path from 'path'
+import fs from 'fs'
+import { createStore } from '../src/store/scheduledStore'
 
 function tmpFile() {
   return path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cc-')), 'scheduled.json')

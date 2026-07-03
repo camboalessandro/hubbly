@@ -1,4 +1,4 @@
-const { validateScheduleInput } = require('../src/shared/validation')
+import { validateScheduleInput } from '../src/shared/validation'
 
 const now = new Date('2026-07-02T10:00:00Z')
 const future = '2026-07-03T09:00:00Z'

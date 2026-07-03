@@ -1,4 +1,4 @@
-const { scheduleTelegramMessage } = require('../src/telegram/scheduler')
+import { scheduleTelegramMessage } from '../src/telegram/scheduler'
 
 test('calls sendMessage with the native schedule option', async () => {
   const calls = []

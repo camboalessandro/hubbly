@@ -1,7 +1,7 @@
-const os = require('os')
-const path = require('path')
-const fs = require('fs')
-const { loadSessionString, saveSessionString } = require('../src/telegram/session')
+import os from 'os'
+import path from 'path'
+import fs from 'fs'
+import { loadSessionString, saveSessionString } from '../src/telegram/session'
 
 function tmpFile() {
   return path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cc-')), 'tg.session')

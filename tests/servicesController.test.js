@@ -1,4 +1,4 @@
-const { createServicesController } = require('../src/main/servicesController')
+import { createServicesController } from '../src/main/servicesController'
 
 const CATALOG = [
   { id: 'whatsapp', name: 'WhatsApp', url: 'https://web.whatsapp.com', partition: 'persist:whatsapp', automation: false, icon: 'assets/whatsapp.svg' },

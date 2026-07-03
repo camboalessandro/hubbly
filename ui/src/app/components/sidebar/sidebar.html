@@ -1,0 +1,31 @@
+@for (svc of store.sidebar(); track svc.id) {
+  <button
+    class="svc-btn"
+    [class.active]="store.activeView() === svc.id"
+    [class.dragging]="draggingId() === svc.id"
+    [attr.data-id]="svc.id"
+    [title]="svc.name"
+    draggable="true"
+    (click)="open.emit(svc)"
+    (dragstart)="onDragStart(svc.id, $event)"
+    (dragend)="onDragEnd()"
+  >
+    <img class="svc-icon" [src]="svc.icon" [alt]="svc.name" />
+    <span class="remove-badge" [title]="'Rimuovi ' + svc.name" (click)="onRemove(svc, $event)">−</span>
+  </button>
+  @if (svc.id === 'telegram') {
+    <button
+      class="sched-btn"
+      data-id="scheduler"
+      title="Messaggi programmati"
+      [class.hidden]="!store.schedulerVisible()"
+      [class.active]="store.activeView() === 'scheduler'"
+      (click)="store.show('scheduler')"
+      [innerHTML]="calendarIcon"
+    ></button>
+  }
+}
+@if (!hasTelegram()) {
+  <button class="sched-btn hidden" data-id="scheduler" [innerHTML]="calendarIcon"></button>
+}
+<button class="add-btn" title="Aggiungi connettore" (click)="addClicked.emit()">+</button>

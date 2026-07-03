@@ -1,4 +1,4 @@
-const { SERVICES, getService } = require('../src/main/serviceRegistry')
+import { SERVICES, getService } from '../src/main/serviceRegistry'
 
 test('registry contains WhatsApp as vetrina-only', () => {
   const wa = getService('whatsapp')

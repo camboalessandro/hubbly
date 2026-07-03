@@ -1,9 +1,9 @@
-const os = require('os')
-const path = require('path')
-const fs = require('fs')
-const { createStore } = require('../src/store/scheduledStore')
-const { scheduleTelegramMessage } = require('../src/telegram/scheduler')
-const { createTelegramService } = require('../src/telegram/telegramService')
+import os from 'os'
+import path from 'path'
+import fs from 'fs'
+import { createStore } from '../src/store/scheduledStore'
+import { scheduleTelegramMessage } from '../src/telegram/scheduler'
+import { createTelegramService } from '../src/telegram/telegramService'
 
 function tmpStore() {
   const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cc-')), 's.json')
