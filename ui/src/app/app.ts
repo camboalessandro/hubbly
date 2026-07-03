@@ -1,9 +1,9 @@
 import { Component, NO_ERRORS_SCHEMA, OnInit, inject, signal } from '@angular/core'
 import { ServicesStore } from './services.store'
 import { ServiceEntry } from './crosschat.types'
-import { Sidebar } from './components/sidebar'
-import { SchedulerPanel } from './components/scheduler-panel'
-import { Picker } from './components/picker'
+import { Sidebar } from './components/sidebar/sidebar'
+import { SchedulerPanel } from './components/scheduler-panel/scheduler-panel'
+import { Picker } from './components/picker/picker'
 
 @Component({
   selector: 'app-root',
@@ -13,25 +13,7 @@ import { Picker } from './components/picker'
   // dashed custom elements, so NO_ERRORS_SCHEMA is required here.
   schemas: [NO_ERRORS_SCHEMA],
   host: { id: 'app' },
-  template: `
-    <app-sidebar id="sidebar" (open)="openService($event)" (addClicked)="pickerOpen.set(true)" />
-    <main id="views">
-      @for (svc of store.views(); track svc.id) {
-        <webview
-          [attr.data-view]="svc.id"
-          [class.hidden]="store.activeView() !== svc.id"
-          [attr.partition]="svc.partition"
-          [attr.src]="store.startedUrls()[svc.id] ?? null"
-          allowpopups
-          (did-navigate)="onNavigate(svc.id, $event)"
-        ></webview>
-      }
-      <app-scheduler-panel />
-    </main>
-    @if (pickerOpen()) {
-      <app-picker (close)="pickerOpen.set(false)" />
-    }
-  `,
+  templateUrl: './app.html',
 })
 export class App implements OnInit {
   readonly store = inject(ServicesStore)
