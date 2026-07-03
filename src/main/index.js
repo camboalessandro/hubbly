@@ -187,7 +187,7 @@ function createWindow() {
     width: 1200,
     height: 800,
     title: 'Hubbly',
-    icon: path.join(__dirname, '..', 'renderer', 'assets', 'icon.png'), // win/linux; macOS uses the dock icon below
+    icon: path.join(__dirname, '..', '..', 'ui', 'dist', 'ui', 'browser', 'assets', 'icon.png'), // win/linux; macOS uses the dock icon below
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload', 'index.js'),
       contextIsolation: true,
@@ -197,7 +197,7 @@ function createWindow() {
     },
   })
   mainWindow = win
-  win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'))
+  win.loadFile(path.join(__dirname, '..', '..', 'ui', 'dist', 'ui', 'browser', 'index.html'))
 
   if (process.env.CC_DIAG) {
     win.webContents.on('preload-error', (_e, p, err) =>
@@ -229,14 +229,19 @@ function createWindow() {
         }
       }
       if (process.env.CC_SHOT) {
+        // Angular applies class bindings asynchronously: wait a tick after each
+        // click before reading classList (the vanilla renderer was synchronous).
         const state = await win.webContents.executeJavaScript(`
-          const q = (id) => document.querySelector('#sidebar button[data-id="'+id+'"]');
-          const sched = document.querySelector('.sched-btn');
-          q('whatsapp').click(); const wa = sched.classList.contains('hidden');
-          q('telegram').click(); const tg = sched.classList.contains('hidden');
-          sched.click(); const sc = sched.classList.contains('hidden');
-          q('telegram').click(); // leave the sidebar on Telegram for the screenshot
-          JSON.stringify({ hidden_onWhatsApp: wa, hidden_onTelegram: tg, hidden_onScheduler: sc });
+          (async () => {
+            const tick = () => new Promise((r) => setTimeout(r, 50));
+            const q = (id) => document.querySelector('#sidebar button[data-id="'+id+'"]');
+            const sched = () => document.querySelector('.sched-btn');
+            q('whatsapp').click(); await tick(); const wa = sched().classList.contains('hidden');
+            q('telegram').click(); await tick(); const tg = sched().classList.contains('hidden');
+            sched().click(); await tick(); const sc = sched().classList.contains('hidden');
+            q('telegram').click(); await tick(); // leave the sidebar on Telegram for the screenshot
+            return JSON.stringify({ hidden_onWhatsApp: wa, hidden_onTelegram: tg, hidden_onScheduler: sc });
+          })()
         `)
         console.error('[DIAG sched-visibility]', state)
         await new Promise((r) => setTimeout(r, 300))
@@ -253,7 +258,7 @@ app.whenReady().then(() => {
   // every service — this is what lets Google sign-in succeed.
   app.userAgentFallback = cleanUserAgent(session.defaultSession.getUserAgent())
   if (process.platform === 'darwin' && app.dock) {
-    app.dock.setIcon(path.join(__dirname, '..', 'renderer', 'assets', 'icon.png'))
+    app.dock.setIcon(path.join(__dirname, '..', '..', 'ui', 'dist', 'ui', 'browser', 'assets', 'icon.png'))
   }
   createWindow()
   app.on('activate', () => {

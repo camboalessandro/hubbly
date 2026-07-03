@@ -11,13 +11,16 @@
     "start": "electron .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "dist": "electron-builder"
+    "dist": "npm run ui:build && electron-builder",
+    "ui:build": "npm --prefix ui run build",
+    "ui:watch": "npm --prefix ui run watch"
   },
   "build": {
     "appId": "com.camboalessandro.hubbly",
     "productName": "Hubbly",
     "files": [
       "src/**/*",
+      "ui/dist/**/*",
       "package.json"
     ],
     "directories": {
