@@ -1,15 +1,17 @@
-const { app, BrowserWindow, ipcMain, session } = require('electron')
-const path = require('path')
-const fs = require('fs')
-const config = require('../config')
-const { createStore } = require('../store/scheduledStore')
-const { createTelegramService } = require('../telegram/telegramService')
-const { scheduleTelegramMessage } = require('../telegram/scheduler')
-const { createClient } = require('../telegram/client')
-const { loadSessionString, saveSessionString } = require('../telegram/session')
-const { createServicesConfig } = require('../store/servicesConfig')
-const { createServicesController } = require('./servicesController')
-const { SERVICES } = require('./serviceRegistry')
+import { app, BrowserWindow, ipcMain, session, webContents, Session, WebContents } from 'electron'
+import path from 'path'
+import fs from 'fs'
+import input from 'input' // interactive terminal prompt (v1 Telegram login)
+import config from '../config'
+import { createStore } from '../store/scheduledStore'
+import { createTelegramService } from '../telegram/telegramService'
+import { scheduleTelegramMessage, SchedulingClient } from '../telegram/scheduler'
+import { createClient } from '../telegram/client'
+import { loadSessionString, saveSessionString } from '../telegram/session'
+import { createServicesConfig } from '../store/servicesConfig'
+import { createServicesController } from './servicesController'
+import { SERVICES } from './serviceRegistry'
+import { ScheduleInput } from '../shared/ipc.types'
 
 // Branding: the app is "Hubbly", but Electron derives its userData dir (where
 // the persist: partitions live) from the app name — renaming would silently log
@@ -30,16 +32,15 @@ const servicesController = createServicesController({ catalog: SERVICES, config:
 
 ipcMain.handle('svc:catalog', () => servicesController.getCatalog())
 ipcMain.handle('svc:enabled', () => servicesController.getEnabled())
-ipcMain.handle('svc:add', (_e, id) => servicesController.add(id))
-ipcMain.handle('svc:remove', (_e, id) => servicesController.remove(id))
-ipcMain.handle('svc:reorder', (_e, ids) => servicesController.reorder(ids))
+ipcMain.handle('svc:add', (_e, id: string) => servicesController.add(id))
+ipcMain.handle('svc:remove', (_e, id: string) => servicesController.remove(id))
+ipcMain.handle('svc:reorder', (_e, ids: string[]) => servicesController.reorder(ids))
 
-ipcMain.handle('tg:schedule', (_e, input) => telegram.schedule(input))
+ipcMain.handle('tg:schedule', (_e, schedInput: ScheduleInput) => telegram.schedule(schedInput))
 ipcMain.handle('tg:list', () => telegram.listScheduled())
 
-ipcMain.handle('tg:login', async (_e, phone) => {
+ipcMain.handle('tg:login', async (_e, phone: string) => {
   try {
-    const input = require('input') // interactive terminal prompt (v1)
     const client = createClient({
       apiId: config.apiId,
       apiHash: config.apiHash,
@@ -51,11 +52,11 @@ ipcMain.handle('tg:login', async (_e, phone) => {
       password: async () => input.text('Password 2FA (se attiva): '),
       onError: (err) => console.error(err),
     })
-    saveSessionString(config.sessionFile, client.session.save())
-    telegram.setClient(client)
+    saveSessionString(config.sessionFile, client.session.save() as unknown as string)
+    telegram.setClient(client as unknown as SchedulingClient)
     return { ok: true }
   } catch (e) {
-    return { ok: false, error: String(e.message || e) }
+    return { ok: false, error: e instanceof Error ? e.message : String(e) }
   }
 })
 
@@ -65,7 +66,7 @@ ipcMain.handle('tg:login', async (_e, phone) => {
 // "browser may not be secure". Instead take Electron's REAL user-agent and just
 // strip the "Electron/x" and app-name tokens, leaving a genuine, self-consistent
 // Chrome identity.
-function cleanUserAgent(ua) {
+function cleanUserAgent(ua: string): string {
   return ua
     .replace(/ Electron\/[\d.]+/i, '')
     .replace(/ crosschat\/[\d.]+/i, '') // package name token
@@ -74,8 +75,8 @@ function cleanUserAgent(ua) {
     .trim()
 }
 
-let mainWindow = null
-let authWindow = null
+let mainWindow: BrowserWindow | null = null
+let authWindow: BrowserWindow | null = null
 
 // Google blocks sign-in inside an Electron <webview> ("browser may not be
 // secure") but allows it in a real BrowserWindow — verified: same Chromium,
@@ -92,8 +93,8 @@ const FIREFOX_UA =
 
 // Firefox sends no Sec-CH-UA headers — strip the ones Chromium adds so the
 // identity stays coherent on Google's sign-in origin. Registered once per session.
-const chStrippedSessions = new WeakSet()
-function stripClientHintsForGoogleAuth(sess) {
+const chStrippedSessions = new WeakSet<Session>()
+function stripClientHintsForGoogleAuth(sess: Session): void {
   if (chStrippedSessions.has(sess)) return
   chStrippedSessions.add(sess)
   sess.webRequest.onBeforeSendHeaders({ urls: ['https://accounts.google.com/*'] }, (details, callback) => {
@@ -115,7 +116,7 @@ const AUTH_PLACEHOLDER =
 <p style="margin:0;color:#6b7280;font-size:14px;line-height:1.6">Completa il login nella finestra che si &egrave; aperta.<br>Se l'hai chiusa, clicca di nuovo l'icona di Gmail per riaprirla.</p>
 </div></body></html>`)
 
-async function openGoogleAuth(contents, url) {
+async function openGoogleAuth(contents: WebContents, url: string): Promise<void> {
   if (authWindow && !authWindow.isDestroyed()) {
     authWindow.focus()
     return
@@ -128,7 +129,7 @@ async function openGoogleAuth(contents, url) {
   // user is NOT signed in, so starting from a clean slate is safe.
   try {
     await sess.clearStorageData()
-  } catch (e) {
+  } catch {
     /* best effort */
   }
 
@@ -141,13 +142,13 @@ async function openGoogleAuth(contents, url) {
     webPreferences: { session: sess },
   })
   authWindow.webContents.setUserAgent(FIREFOX_UA)
-  authWindow.loadURL(url)
-  contents.loadURL(AUTH_PLACEHOLDER) // tell the user where the login went
+  void authWindow.loadURL(url)
+  void contents.loadURL(AUTH_PLACEHOLDER) // tell the user where the login went
 
-  const backToService = (u) => {
+  const backToService = (u: string): void => {
     if (u.includes('mail.google.com') && !u.includes('accounts.')) {
       if (authWindow && !authWindow.isDestroyed()) authWindow.close()
-      contents.loadURL('https://mail.google.com/mail/u/0/')
+      void contents.loadURL('https://mail.google.com/mail/u/0/')
     }
   }
   authWindow.webContents.on('did-navigate', (_e, u) => backToService(u))
@@ -162,7 +163,7 @@ app.on('web-contents-created', (_e, contents) => {
 
   contents.setWindowOpenHandler(({ url }) => {
     if (url.includes('accounts.google.com')) {
-      openGoogleAuth(contents, url)
+      void openGoogleAuth(contents, url)
       return { action: 'deny' }
     }
     // Other popups (media, etc.) open as a child window sharing the session.
@@ -172,17 +173,17 @@ app.on('web-contents-created', (_e, contents) => {
     }
   })
 
-  const routeGoogleAuth = (event, url) => {
+  const routeGoogleAuth = (event: { preventDefault(): void }, url: string): void => {
     if (url.includes('accounts.google.com')) {
       event.preventDefault()
-      openGoogleAuth(contents, url)
+      void openGoogleAuth(contents, url)
     }
   }
   contents.on('will-navigate', routeGoogleAuth)
   contents.on('will-redirect', routeGoogleAuth)
 })
 
-function createWindow() {
+function createWindow(): void {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -197,16 +198,15 @@ function createWindow() {
     },
   })
   mainWindow = win
-  win.loadFile(path.join(__dirname, '..', '..', 'ui', 'dist', 'ui', 'browser', 'index.html'))
+  void win.loadFile(path.join(__dirname, '..', '..', 'ui', 'dist', 'ui', 'browser', 'index.html'))
 
-  if (process.env.CC_DIAG) {
+  if (process.env['CC_DIAG']) {
     win.webContents.on('preload-error', (_e, p, err) =>
       console.error('[DIAG preload-error]', p, err && err.stack ? err.stack : err))
-    win.webContents.on('console-message', (_e, level, message, line, source) =>
+    win.webContents.on('console-message', (_e, _level, message, line, source) =>
       console.error('[DIAG renderer]', `${source}:${line}`, message))
     win.webContents.on('did-finish-load', async () => {
-      if (process.env.CC_UACHECK) {
-        const { webContents } = require('electron')
+      if (process.env['CC_UACHECK']) {
         await new Promise((r) => setTimeout(r, 2500)) // let guest pages start
         for (const g of webContents.getAllWebContents()) {
           if (g.getType() !== 'webview') continue
@@ -215,7 +215,7 @@ function createWindow() {
               '({ua: navigator.userAgent, brands: (navigator.userAgentData && navigator.userAgentData.brands) || null, webdriver: navigator.webdriver})')
             console.error('[DIAG guest]', g.getURL().slice(0, 45), JSON.stringify(info))
           } catch (e) {
-            console.error('[DIAG guest]', g.getURL().slice(0, 45), 'exec-failed', String(e.message || e))
+            console.error('[DIAG guest]', g.getURL().slice(0, 45), 'exec-failed', e instanceof Error ? e.message : String(e))
           }
         }
         await new Promise((r) => setTimeout(r, 2500)) // let the auth window load
@@ -223,12 +223,12 @@ function createWindow() {
           if (g.getType() === 'webview') continue
           const u = g.getURL()
           if (!u.includes('accounts.google.com')) continue
-          const txt = await g.executeJavaScript('document.body.innerText').catch(() => '')
+          const txt: string = await g.executeJavaScript('document.body.innerText').catch(() => '')
           const blocked = /non sicur|not be secure|Impossibile eseguire/i.test(txt)
           console.error('[DIAG authwin]', u.slice(0, 45), 'blocked=', blocked, '::', txt.replace(/\s+/g, ' ').slice(0, 70))
         }
       }
-      if (process.env.CC_SHOT) {
+      if (process.env['CC_SHOT']) {
         // Angular applies class bindings asynchronously: wait a tick after each
         // click before reading classList (the vanilla renderer was synchronous).
         const state = await win.webContents.executeJavaScript(`
@@ -244,7 +244,7 @@ function createWindow() {
           })()
         `)
         console.error('[DIAG sched-visibility]', state)
-        await new Promise((r) => setTimeout(r, Number(process.env.CC_SHOT_WAIT || 300)))
+        await new Promise((r) => setTimeout(r, Number(process.env['CC_SHOT_WAIT'] || 300)))
         const img = await win.webContents.capturePage()
         fs.writeFileSync('/tmp/crosschat-telegram.png', img.toPNG())
       }
@@ -258,7 +258,7 @@ app.whenReady().then(() => {
   // every service — this is what lets Google sign-in succeed.
   app.userAgentFallback = cleanUserAgent(session.defaultSession.getUserAgent())
   if (process.platform === 'darwin' && app.dock) {
-    app.dock.setIcon(path.join(__dirname, '..', '..', 'ui', 'dist', 'ui', 'browser', 'assets', 'icon.png'))
+    void app.dock.setIcon(path.join(__dirname, '..', '..', 'ui', 'dist', 'ui', 'browser', 'assets', 'icon.png'))
   }
   createWindow()
   app.on('activate', () => {

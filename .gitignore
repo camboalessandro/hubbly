@@ -9,3 +9,4 @@ docs/
 PROJECT.md
 .claude/
 .angular/
+dist-electron/

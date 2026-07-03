@@ -1,7 +1,7 @@
-const os = require('os')
-const path = require('path')
-const fs = require('fs')
-const { createServicesConfig } = require('../src/store/servicesConfig')
+import os from 'os'
+import path from 'path'
+import fs from 'fs'
+import { createServicesConfig } from '../src/store/servicesConfig'
 
 const CATALOG = ['whatsapp', 'telegram', 'teams', 'discord', 'slack']
 const DEFAULT = ['whatsapp', 'telegram', 'teams', 'discord']

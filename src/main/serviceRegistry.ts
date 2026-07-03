@@ -1,6 +1,8 @@
-// Icon files live in src/renderer/assets/. Drop in your own SVG or PNG
+import { ServiceEntry } from '../shared/ipc.types'
+
+// Icon files live in ui/public/assets/. Drop in your own SVG or PNG
 // (transparent, square, >=128px) with the same filename to replace them.
-const SERVICES = [
+export const SERVICES: ServiceEntry[] = [
   {
     id: 'whatsapp',
     name: 'WhatsApp',
@@ -60,8 +62,8 @@ const SERVICES = [
   {
     id: 'gmail',
     name: 'Gmail',
-    // Google blocks sign-in inside a webview, so main/index.js routes it to a
-    // real window (Firefox identity + clean session). `lazy` keeps the webview
+    // Google blocks sign-in inside a webview, so main routes it to a real
+    // window (Firefox identity + clean session). `lazy` keeps the webview
     // from loading — and that window from appearing — until the user opens Gmail.
     url: 'https://mail.google.com/mail/u/0/',
     partition: 'persist:gmail',
@@ -79,8 +81,6 @@ const SERVICES = [
   },
 ]
 
-function getService(id) {
+export function getService(id: string): ServiceEntry | undefined {
   return SERVICES.find((s) => s.id === id)
 }
-
-module.exports = { SERVICES, getService }

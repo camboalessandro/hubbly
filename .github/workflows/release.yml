@@ -31,6 +31,8 @@ jobs:
 
       - run: npm run ui:build
 
+      - run: npm run main:build
+
       - run: npm test
 
       # Build only — publishing happens once, in the release job below.

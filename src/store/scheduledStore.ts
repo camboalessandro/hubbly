@@ -1,22 +1,29 @@
-const fs = require('fs')
-const crypto = require('crypto')
+import fs from 'fs'
+import crypto from 'crypto'
+import { ScheduledEntry } from '../shared/ipc.types'
 
-function createStore(filePath) {
-  function read() {
+export interface ScheduledStore {
+  add(input: { recipient: string; text: string; when: Date | string }): ScheduledEntry
+  list(): ScheduledEntry[]
+  remove(id: string): boolean
+}
+
+export function createStore(filePath: string): ScheduledStore {
+  function read(): ScheduledEntry[] {
     try {
-      return JSON.parse(fs.readFileSync(filePath, 'utf8'))
-    } catch (e) {
+      return JSON.parse(fs.readFileSync(filePath, 'utf8')) as ScheduledEntry[]
+    } catch {
       return []
     }
   }
-  function write(entries) {
+  function write(entries: ScheduledEntry[]): void {
     fs.writeFileSync(filePath, JSON.stringify(entries, null, 2))
   }
 
   return {
     add({ recipient, text, when }) {
       const entries = read()
-      const entry = {
+      const entry: ScheduledEntry = {
         id: crypto.randomUUID(),
         recipient,
         text,
@@ -38,5 +45,3 @@ function createStore(filePath) {
     },
   }
 }
-
-module.exports = { createStore }

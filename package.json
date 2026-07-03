@@ -3,23 +3,25 @@
   "productName": "Hubbly",
   "version": "1.0.2",
   "description": "Hubbly — all your chats in one place, with scheduling where it's legal.",
-  "main": "src/main/index.js",
+  "main": "dist-electron/main/index.js",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "start": "electron .",
+    "start": "npm run main:build && electron .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "dist": "npm run ui:build && electron-builder",
+    "dist": "npm run ui:build && npm run main:build && electron-builder",
     "ui:build": "npm --prefix ui run build",
-    "ui:watch": "npm --prefix ui run watch"
+    "ui:watch": "npm --prefix ui run watch",
+    "main:build": "tsc -p tsconfig.main.json",
+    "main:watch": "tsc -w -p tsconfig.main.json"
   },
   "build": {
     "appId": "com.camboalessandro.hubbly",
     "productName": "Hubbly",
     "files": [
-      "src/**/*",
+      "dist-electron/**/*",
       "ui/dist/**/*",
       "package.json"
     ],
@@ -49,8 +51,10 @@
     "telegram": "^2.26.22"
   },
   "devDependencies": {
+    "@types/node": "^26.1.0",
     "electron": "^37.10.3",
     "electron-builder": "^26.15.3",
+    "typescript": "^6.0.3",
     "vitest": "^1.6.1"
   }
 }
