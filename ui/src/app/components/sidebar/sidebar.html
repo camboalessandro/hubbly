@@ -11,6 +11,9 @@
     (dragend)="onDragEnd()"
   >
     <img class="svc-icon" [src]="svc.icon" [alt]="svc.name" />
+    @if ((store.unreadCounts()[svc.id] ?? 0) > 0) {
+      <span class="unread-badge">{{ unreadLabel(store.unreadCounts()[svc.id]) }}</span>
+    }
     <span class="remove-badge" [title]="'Rimuovi ' + svc.name" (click)="onRemove(svc, $event)">−</span>
   </button>
   @if (svc.id === 'telegram') {

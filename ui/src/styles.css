@@ -94,3 +94,13 @@ webview.hidden { display: none; }
 /* Drag & drop reorder */
 #sidebar button.svc-btn.dragging { opacity: 0.4; }
 #sidebar button.svc-btn { transition: background 0.12s, transform 0.08s; }
+
+/* Unread counter on service icons (always visible; the hover-only remove
+   badge sits above it at the same corner) */
+#sidebar button.svc-btn .unread-badge {
+  position: absolute; top: -4px; right: -4px; min-width: 12px; height: 16px;
+  padding: 1px 4px; border-radius: 10px; background: #e03131; color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 16px; text-align: center;
+  border: 2px solid #202124; z-index: 1;
+}
+#sidebar button.svc-btn .remove-badge { z-index: 2; }

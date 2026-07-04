@@ -23,6 +23,11 @@ export class Sidebar {
   readonly calendarIcon: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(CALENDAR_SVG)
   readonly hasTelegram = computed(() => this.store.sidebar().some((e) => e.id === 'telegram'))
 
+  unreadLabel(n: number | undefined): string {
+    const c = n ?? 0
+    return c > 99 ? '99+' : String(c)
+  }
+
   async onRemove(svc: ServiceEntry, ev: Event): Promise<void> {
     ev.stopPropagation()
     await this.store.remove(svc.id)
