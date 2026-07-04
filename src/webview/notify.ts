@@ -12,8 +12,9 @@ function init(): void {
   const { ipcRenderer } = require('electron') as typeof import('electron')
 
   let badgingApiUsed = false
-  const report = (count: number): void => {
+  const report = (count: number, channel: string): void => {
     ipcRenderer.sendToHost('hubbly:unread', count)
+    ipcRenderer.sendToHost('hubbly:notif-debug', `${channel}=${count}`)
   }
 
   // Primary channel: the page announces its own unread count (WhatsApp Web,
@@ -25,12 +26,12 @@ function init(): void {
   }
   nav.setAppBadge = (n?: number) => {
     badgingApiUsed = true
-    report(typeof n === 'number' ? n : 0)
+    report(typeof n === 'number' ? n : 0, 'badge-api')
     return Promise.resolve()
   }
   nav.clearAppBadge = () => {
     badgingApiUsed = true
-    report(0)
+    report(0, 'badge-api-clear')
     return Promise.resolve()
   }
 
@@ -43,13 +44,13 @@ function init(): void {
     const count = parseUnreadFromTitle(document.title) ?? 0
     if (count === 0) {
       if (zeroTimer) clearTimeout(zeroTimer)
-      zeroTimer = setTimeout(() => report(0), 2500)
+      zeroTimer = setTimeout(() => report(0, 'title-zero'), 2500)
     } else {
       if (zeroTimer) {
         clearTimeout(zeroTimer)
         zeroTimer = null
       }
-      report(count)
+      report(count, `title:"${document.title.slice(0, 30)}"`)
     }
   }
   window.addEventListener('DOMContentLoaded', () => {
