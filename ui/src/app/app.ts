@@ -1,4 +1,4 @@
-import { Component, NO_ERRORS_SCHEMA, OnInit, inject, signal } from '@angular/core'
+import { Component, NO_ERRORS_SCHEMA, OnInit, effect, inject, signal } from '@angular/core'
 import { ServicesStore } from './services.store'
 import { ServiceEntry } from './hubbly.types'
 import { Sidebar } from './components/sidebar/sidebar'
@@ -21,7 +21,25 @@ export class App implements OnInit {
   /** Last real URL each webview navigated to (the auth flow parks Gmail on a data: placeholder). */
   private lastUrls = new Map<string, string>()
 
+  constructor() {
+    // Keep the dock badge in sync with the true total across all services
+    // (fixes each service overwriting the global badge with its own count).
+    effect(() => {
+      void window.hubbly.setBadge(this.store.totalUnread())
+    })
+  }
+
   ngOnInit(): void { void this.store.init() }
+
+  onGuestMessage(id: string, ev: Event): void {
+    const msg = ev as unknown as { channel: string; args: unknown[] }
+    if (msg.channel === 'hubbly:unread') {
+      this.store.setUnread(id, Number(msg.args?.[0]) || 0)
+    } else if (msg.channel === 'hubbly:notification-click') {
+      this.store.show(id)
+      void window.hubbly.focusWindow()
+    }
+  }
 
   onNavigate(id: string, ev: Event): void {
     const url = (ev as unknown as { url?: string }).url

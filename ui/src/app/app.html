@@ -4,10 +4,12 @@
     <webview
       [attr.data-view]="svc.id"
       [class.hidden]="store.activeView() !== svc.id"
+      [attr.preload]="store.webviewPreload() || null"
       [attr.partition]="svc.partition"
       [attr.src]="store.startedUrls()[svc.id] ?? null"
       allowpopups
       (did-navigate)="onNavigate(svc.id, $event)"
+      (ipc-message)="onGuestMessage(svc.id, $event)"
     ></webview>
   }
   <app-scheduler-panel />
