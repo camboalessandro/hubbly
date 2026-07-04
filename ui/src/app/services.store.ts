@@ -14,6 +14,12 @@ export class ServicesStore {
   readonly activeView = signal<string>('')
   /** src attribute per service id; lazy services stay undefined until opened. */
   readonly startedUrls = signal<Record<string, string>>({})
+  /** File URL of the webview spy preload; resolved before any webview renders. */
+  readonly webviewPreload = signal<string>('')
+  /** Unread messages per service, reported by the webview spy. */
+  readonly unreadCounts = signal<Record<string, number>>({})
+  readonly totalUnread = computed(() =>
+    Object.values(this.unreadCounts()).reduce((a, b) => a + b, 0))
 
   readonly schedulerVisible = computed(() => {
     const a = this.activeView()
@@ -21,6 +27,9 @@ export class ServicesStore {
   })
 
   async init(): Promise<void> {
+    // The spy preload path must be known BEFORE any webview renders (the
+    // preload attribute only takes effect when the webview attaches).
+    this.webviewPreload.set(await this.api.getWebviewPreloadPath())
     const entries = await this.api.getEnabledServices()
     this.sidebar.set(entries)
     this.views.set(entries)
@@ -31,6 +40,10 @@ export class ServicesStore {
   }
 
   show(id: string): void { this.activeView.set(id) }
+
+  setUnread(id: string, count: number): void {
+    this.unreadCounts.update((m) => ({ ...m, [id]: count }))
+  }
 
   /** Give a (lazy) service its URL on first open. */
   start(entry: ServiceEntry): void {
@@ -54,6 +67,7 @@ export class ServicesStore {
     await this.api.removeService(id)
     this.sidebar.update((s) => s.filter((e) => e.id !== id))
     this.views.update((v) => v.filter((e) => e.id !== id))
+    this.unreadCounts.update(({ [id]: _gone, ...rest }) => rest)
     if (wasActive) this.show(this.sidebar()[0]?.id ?? 'scheduler')
   }
 

@@ -30,6 +30,9 @@ declare global {
       addService(id: string): Promise<ServiceEntry[]>
       removeService(id: string): Promise<ServiceEntry[]>
       reorderServices(ids: string[]): Promise<ServiceEntry[]>
+      getWebviewPreloadPath(): Promise<string>
+      setBadge(total: number): Promise<void>
+      focusWindow(): Promise<void>
       scheduleMessage(input: { recipient: string; text: string; when: Date }): Promise<ScheduleResult>
       listScheduled(): Promise<ScheduledEntry[]>
       loginTelegram(phone: string): Promise<{ ok: boolean; error?: string }>
