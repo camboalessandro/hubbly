@@ -50,11 +50,28 @@ function init(): void {
   const debug = (what: string): void => {
     ipcRenderer.sendToHost('hubbly:notif-debug', what)
   }
+  // The service name, derived from the page we live in, prefixes notification
+  // titles ("WhatsApp · Marco") so the user sees WHERE a message came from —
+  // macOS always shows the sender app's own icon, that part is not spoofable.
+  const SERVICE_NAMES: Record<string, string> = {
+    'web.whatsapp.com': 'WhatsApp',
+    'web.telegram.org': 'Telegram',
+    'teams.microsoft.com': 'Teams',
+    'teams.live.com': 'Teams',
+    'discord.com': 'Discord',
+    'app.slack.com': 'Slack',
+    'www.messenger.com': 'Messenger',
+    'www.instagram.com': 'Instagram',
+    'mail.google.com': 'Gmail',
+    'open.spotify.com': 'Spotify',
+  }
+  const serviceName = SERVICE_NAMES[location.hostname] ?? location.hostname
+
   const NativeNotification = window.Notification
   if (NativeNotification) {
     const Wrapped = function (title: string, options?: NotificationOptions) {
       debug('constructor-created')
-      const n = new NativeNotification(title, options)
+      const n = new NativeNotification(`${serviceName} · ${title}`, options)
       n.addEventListener('click', () => {
         debug('constructor-clicked')
         ipcRenderer.sendToHost('hubbly:notification-click')
