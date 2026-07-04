@@ -1,7 +1,7 @@
 {
   "name": "hubbly",
   "productName": "Hubbly",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Hubbly — all your chats in one place, with scheduling where it's legal.",
   "main": "dist-electron/main/index.js",
   "engines": {
