@@ -34,10 +34,23 @@ function init(): void {
     return Promise.resolve()
   }
 
-  // Fallback: many services put "(N)" in the tab title instead.
+  // Fallback: many services put "(N)" in the tab title instead. Some of them
+  // BLINK it ("(1) X" ↔ "X") for attention — debounce the drops to zero so the
+  // badge doesn't flap; increases still report immediately.
+  let zeroTimer: ReturnType<typeof setTimeout> | null = null
   const reportFromTitle = (): void => {
     if (badgingApiUsed) return
-    report(parseUnreadFromTitle(document.title) ?? 0)
+    const count = parseUnreadFromTitle(document.title) ?? 0
+    if (count === 0) {
+      if (zeroTimer) clearTimeout(zeroTimer)
+      zeroTimer = setTimeout(() => report(0), 2500)
+    } else {
+      if (zeroTimer) {
+        clearTimeout(zeroTimer)
+        zeroTimer = null
+      }
+      report(count)
+    }
   }
   window.addEventListener('DOMContentLoaded', () => {
     const el = document.querySelector('title')
