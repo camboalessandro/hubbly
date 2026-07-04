@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, session, webContents, Session, WebContents } from 'electron'
 import path from 'path'
 import fs from 'fs'
+import { pathToFileURL } from 'url'
 import input from 'input' // interactive terminal prompt (v1 Telegram login)
 import config from '../config'
 import { createStore } from '../store/scheduledStore'
@@ -36,6 +37,21 @@ ipcMain.handle('svc:enabled', () => servicesController.getEnabled())
 ipcMain.handle('svc:add', (_e, id: string) => servicesController.add(id))
 ipcMain.handle('svc:remove', (_e, id: string) => servicesController.remove(id))
 ipcMain.handle('svc:reorder', (_e, ids: string[]) => servicesController.reorder(ids))
+
+// Notifications & badges: the webview spy preload path, the aggregated dock
+// badge (the UI sums all services — fixes "last setAppBadge wins"), and
+// focusing the window when a notification is clicked.
+ipcMain.handle('app:webview-preload', () =>
+  pathToFileURL(path.join(__dirname, '..', 'webview', 'notify.js')).toString())
+ipcMain.handle('app:badge', (_e, total: number) => {
+  app.setBadgeCount(Number(total) || 0)
+})
+ipcMain.handle('app:focus', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.show()
+    mainWindow.focus()
+  }
+})
 
 ipcMain.handle('tg:schedule', (_e, schedInput: ScheduleInput) => telegram.schedule(schedInput))
 ipcMain.handle('tg:list', () => telegram.listScheduled())
