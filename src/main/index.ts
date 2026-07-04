@@ -45,7 +45,6 @@ ipcMain.handle('app:webview-preload', () =>
   pathToFileURL(path.join(__dirname, '..', 'webview', 'notify.js')).toString())
 ipcMain.handle('app:badge', (_e, total: number) => {
   const n = Number(total) || 0
-  if (process.env['CC_DIAG']) console.error('[DIAG badge]', n)
   if (process.platform === 'darwin' && app.dock) {
     app.dock.setBadge(n > 0 ? String(n) : '') // direct dock-tile API, most reliable on macOS
   } else {

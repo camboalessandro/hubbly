@@ -12,9 +12,8 @@ function init(): void {
   const { ipcRenderer } = require('electron') as typeof import('electron')
 
   let badgingApiUsed = false
-  const report = (count: number, channel: string): void => {
+  const report = (count: number): void => {
     ipcRenderer.sendToHost('hubbly:unread', count)
-    ipcRenderer.sendToHost('hubbly:notif-debug', `${channel}=${count}`)
   }
 
   // Primary channel: the page announces its own unread count (WhatsApp Web,
@@ -26,12 +25,12 @@ function init(): void {
   }
   nav.setAppBadge = (n?: number) => {
     badgingApiUsed = true
-    report(typeof n === 'number' ? n : 0, 'badge-api')
+    report(typeof n === 'number' ? n : 0)
     return Promise.resolve()
   }
   nav.clearAppBadge = () => {
     badgingApiUsed = true
-    report(0, 'badge-api-clear')
+    report(0)
     return Promise.resolve()
   }
 
@@ -44,13 +43,13 @@ function init(): void {
     const count = parseUnreadFromTitle(document.title) ?? 0
     if (count === 0) {
       if (zeroTimer) clearTimeout(zeroTimer)
-      zeroTimer = setTimeout(() => report(0, 'title-zero'), 2500)
+      zeroTimer = setTimeout(() => report(0), 2000)
     } else {
       if (zeroTimer) {
         clearTimeout(zeroTimer)
         zeroTimer = null
       }
-      report(count, `title:"${document.title.slice(0, 30)}"`)
+      report(count)
     }
   }
   window.addEventListener('DOMContentLoaded', () => {
@@ -59,14 +58,14 @@ function init(): void {
     reportFromTitle()
   })
 
-  // Notification click → tell the host which service was clicked (the host
-  // knows: one preload instance per webview). Native notification still shows.
-  const debug = (what: string): void => {
-    ipcRenderer.sendToHost('hubbly:notif-debug', what)
-  }
   // The service name, derived from the page we live in, prefixes notification
   // titles ("WhatsApp · Marco") so the user sees WHERE a message came from —
   // macOS always shows the sender app's own icon, that part is not spoofable.
+  // NOTE: only works for services that create notifications with the page's
+  // `new Notification()`. Services that notify from their Service Worker
+  // (e.g. WhatsApp Web) run in a context this page-level spy can't reach, so
+  // their notifications are neither prefixed nor click-routed. Badges still
+  // work for them (read from the title/Badging API here).
   const SERVICE_NAMES: Record<string, string> = {
     'web.whatsapp.com': 'WhatsApp',
     'web.telegram.org': 'Telegram',
@@ -84,32 +83,14 @@ function init(): void {
   const NativeNotification = window.Notification
   if (NativeNotification) {
     const Wrapped = function (title: string, options?: NotificationOptions) {
-      debug('constructor-created')
       const n = new NativeNotification(`${serviceName} · ${title}`, options)
-      n.addEventListener('click', () => {
-        debug('constructor-clicked')
-        ipcRenderer.sendToHost('hubbly:notification-click')
-      })
+      n.addEventListener('click', () => ipcRenderer.sendToHost('hubbly:notification-click'))
       return n
     } as unknown as typeof Notification
     Wrapped.prototype = NativeNotification.prototype
     Object.defineProperty(Wrapped, 'permission', { get: () => NativeNotification.permission })
     Wrapped.requestPermission = NativeNotification.requestPermission.bind(NativeNotification)
     window.Notification = Wrapped
-  }
-
-  // Detection only: some services show notifications through their Service
-  // Worker registration instead of the constructor. Clicks on those are NOT
-  // interceptable from the page — this tells us if that's the path in use.
-  const swProto = (window as { ServiceWorkerRegistration?: { prototype: object } }).ServiceWorkerRegistration?.prototype as
-    | { showNotification?: (...a: unknown[]) => Promise<void> }
-    | undefined
-  if (swProto?.showNotification) {
-    const orig = swProto.showNotification
-    swProto.showNotification = function (...a: unknown[]) {
-      debug('sw-shown')
-      return orig.apply(this, a)
-    }
   }
 }
 

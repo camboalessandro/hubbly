@@ -36,12 +36,8 @@ export class App implements OnInit {
     if (msg.channel === 'hubbly:unread') {
       this.store.setUnread(id, Number(msg.args?.[0]) || 0)
     } else if (msg.channel === 'hubbly:notification-click') {
-      console.log('[hubbly] notification click →', id)
       this.store.show(id)
       void window.hubbly.focusWindow()
-    } else if (msg.channel === 'hubbly:notif-debug') {
-      // Diagnostic trail (visible via CC_DIAG): which path notifications take.
-      console.log('[hubbly] notif-debug', id, msg.args?.[0])
     }
   }
 
