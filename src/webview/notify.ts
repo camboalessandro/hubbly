@@ -47,17 +47,38 @@ function init(): void {
 
   // Notification click → tell the host which service was clicked (the host
   // knows: one preload instance per webview). Native notification still shows.
+  const debug = (what: string): void => {
+    ipcRenderer.sendToHost('hubbly:notif-debug', what)
+  }
   const NativeNotification = window.Notification
   if (NativeNotification) {
     const Wrapped = function (title: string, options?: NotificationOptions) {
+      debug('constructor-created')
       const n = new NativeNotification(title, options)
-      n.addEventListener('click', () => ipcRenderer.sendToHost('hubbly:notification-click'))
+      n.addEventListener('click', () => {
+        debug('constructor-clicked')
+        ipcRenderer.sendToHost('hubbly:notification-click')
+      })
       return n
     } as unknown as typeof Notification
     Wrapped.prototype = NativeNotification.prototype
     Object.defineProperty(Wrapped, 'permission', { get: () => NativeNotification.permission })
     Wrapped.requestPermission = NativeNotification.requestPermission.bind(NativeNotification)
     window.Notification = Wrapped
+  }
+
+  // Detection only: some services show notifications through their Service
+  // Worker registration instead of the constructor. Clicks on those are NOT
+  // interceptable from the page — this tells us if that's the path in use.
+  const swProto = (window as { ServiceWorkerRegistration?: { prototype: object } }).ServiceWorkerRegistration?.prototype as
+    | { showNotification?: (...a: unknown[]) => Promise<void> }
+    | undefined
+  if (swProto?.showNotification) {
+    const orig = swProto.showNotification
+    swProto.showNotification = function (...a: unknown[]) {
+      debug('sw-shown')
+      return orig.apply(this, a)
+    }
   }
 }
 
