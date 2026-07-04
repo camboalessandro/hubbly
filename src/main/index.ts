@@ -271,7 +271,11 @@ function createWindow(): void {
         const img = await win.webContents.capturePage()
         fs.writeFileSync('/tmp/hubbly-diag.png', img.toPNG())
       }
-      setTimeout(() => app.quit(), 200)
+      // Auto-quit belongs to the automated capture modes only; plain CC_DIAG
+      // is interactive logging and must leave the app running.
+      if (process.env['CC_SHOT'] || process.env['CC_UACHECK']) {
+        setTimeout(() => app.quit(), 200)
+      }
     })
   }
 }
